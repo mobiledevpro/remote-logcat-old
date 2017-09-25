@@ -90,10 +90,14 @@ class DBContract {
         cv.put(Table.COLUMN_LOG_LEVEL, logEntry.getLogLevel());
         cv.put(Table.COLUMN_LOG_TAG, logEntry.getLogTag());
         cv.put(Table.COLUMN_LOG_MSG, logEntry.getLogMsg());
-        cv.put(Table.COLUMN_APP_USER, logEntry.getAppUserInfo());
+        UserInfoModel userInfo = logEntry.getAppUserInfo();
+        if (userInfo != null) {
+            cv.put(Table.COLUMN_APP_USER, userInfo.getString());
+        }
 
-        LogEntryModel.AppInfo appInfo = logEntry.getAppInfo();
+        AppInfoModel appInfo = logEntry.getAppInfo();
         if (appInfo != null) {
+            cv.put(Table.COLUMN_APP_NAME, appInfo.getName());
             cv.put(Table.COLUMN_APP_VERSION, appInfo.getVersion());
             cv.put(Table.COLUMN_APP_BUILD, appInfo.getBuild());
         }
@@ -155,11 +159,12 @@ class DBContract {
                 cursor.getInt(cursor.getColumnIndex(Table.COLUMN_LOG_LEVEL)),
                 cursor.getString(cursor.getColumnIndex(Table.COLUMN_LOG_TAG)),
                 cursor.getString(cursor.getColumnIndex(Table.COLUMN_LOG_MSG)),
-                new LogEntryModel.AppInfo(
+                new AppInfoModel(
+                        cursor.getString(cursor.getColumnIndex(Table.COLUMN_APP_NAME)),
                         cursor.getString(cursor.getColumnIndex(Table.COLUMN_APP_VERSION)),
                         cursor.getInt(cursor.getColumnIndex(Table.COLUMN_APP_BUILD))
                 ),
-                cursor.getString(cursor.getColumnIndex(Table.COLUMN_APP_USER))
+                new UserInfoModel().parseUserInfo(cursor.getString(cursor.getColumnIndex(Table.COLUMN_APP_USER)))
         );
     }
 
@@ -169,9 +174,10 @@ class DBContract {
         private static final String COLUMN_LOG_LEVEL = "log_level"; //see Constants class
         private static final String COLUMN_LOG_TAG = "log_tag";
         private static final String COLUMN_LOG_MSG = "log_msg";
+        private static final String COLUMN_APP_NAME = "app_name";
         private static final String COLUMN_APP_VERSION = "app_version";
         private static final String COLUMN_APP_BUILD = "app_build";
-        private static final String COLUMN_APP_USER = "app_user"; //some data about user (divider - ";")
+        private static final String COLUMN_APP_USER = "app_user"; //some data about user (divider - "|")
 
         //table create sql
         private static final String SQL_CREATE_TABLE = "create table IF NOT EXISTS "
@@ -182,6 +188,7 @@ class DBContract {
                 + COLUMN_LOG_LEVEL + " INTEGER, "
                 + COLUMN_LOG_TAG + " TEXT, "
                 + COLUMN_LOG_MSG + " TEXT, "
+                + COLUMN_APP_NAME + " TEXT, "
                 + COLUMN_APP_VERSION + " TEXT, "
                 + COLUMN_APP_BUILD + " INTEGER, "
                 + COLUMN_APP_USER + " TEXT "
@@ -193,6 +200,7 @@ class DBContract {
                 COLUMN_LOG_LEVEL,
                 COLUMN_LOG_TAG,
                 COLUMN_LOG_MSG,
+                COLUMN_APP_NAME,
                 COLUMN_APP_VERSION,
                 COLUMN_APP_BUILD,
                 COLUMN_APP_USER

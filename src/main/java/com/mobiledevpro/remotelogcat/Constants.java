@@ -1,7 +1,7 @@
 package com.mobiledevpro.remotelogcat;
 
 /**
- * Class for saving data locally
+ * Class for storing constant values
  * <p>
  * Created by Dmitriy V. Chernysh on 23.09.17.
  * dmitriy.chernysh@gmail.com
@@ -11,5 +11,9 @@ package com.mobiledevpro.remotelogcat;
  * #MobileDevPro
  */
 
-class DatabaseHelper {
+class Constants {
+    static final int LOG_LEVEL_DEBUG = 1;
+    static final int LOG_LEVEL_ERROR = 2;
+
+    static final String LOG_TAG = "remote-logcat";
 }

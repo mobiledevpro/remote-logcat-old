@@ -18,13 +18,13 @@ class LogEntryModel {
     private int logLevel;
     private String logTag;
     private String logMsg;
-    private AppInfo appInfo;
-    private String appUserInfo; //divider ";" (login;email;etc.)
+    private AppInfoModel appInfo;
+    private UserInfoModel appUserInfo;
 
     /**
      * Constructor for getting entry from DB
      */
-    LogEntryModel(int id, long dateTime, int logLevel, String logTag, String logMsg, AppInfo appInfo, String appUserInfo) {
+    LogEntryModel(int id, long dateTime, int logLevel, String logTag, String logMsg, AppInfoModel appInfo, UserInfoModel appUserInfo) {
         this.id = id;
         this.dateTime = dateTime;
         this.logLevel = logLevel;
@@ -37,8 +37,7 @@ class LogEntryModel {
     /**
      * Constructor for creating a new entry
      */
-    LogEntryModel(long dateTime, int logLevel, String logTag, String logMsg, AppInfo appInfo, String appUserInfo) {
-        this.id = id;
+    LogEntryModel(long dateTime, int logLevel, String logTag, String logMsg, AppInfoModel appInfo, UserInfoModel appUserInfo) {
         this.dateTime = dateTime;
         this.logLevel = logLevel;
         this.logTag = logTag;
@@ -67,39 +66,12 @@ class LogEntryModel {
         return logMsg;
     }
 
-    AppInfo getAppInfo() {
+    AppInfoModel getAppInfo() {
         return appInfo;
     }
 
-    String getAppUserInfo() {
+    UserInfoModel getAppUserInfo() {
         return appUserInfo;
-    }
-
-    static class AppInfo {
-        private String name;
-        private String version;
-        private int build;
-
-        /**
-         * Constructor for getting entry from DB
-         */
-        AppInfo(String version, int build) {
-            this.name = name;
-            this.version = version;
-            this.build = build;
-        }
-
-        String getName() {
-            return name;
-        }
-
-        String getVersion() {
-            return version;
-        }
-
-        int getBuild() {
-            return build;
-        }
     }
 
 }

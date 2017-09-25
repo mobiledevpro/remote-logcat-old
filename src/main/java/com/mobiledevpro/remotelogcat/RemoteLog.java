@@ -1,5 +1,6 @@
 package com.mobiledevpro.remotelogcat;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,32 +19,43 @@ import android.util.Log;
 public class RemoteLog {
 
     private static String sToken;
+    private static LogManager sLogManager;
 
     private RemoteLog() {
     }
 
-    public static void init(@NonNull String token) {
+    public static void init(Context context, @NonNull String token) {
         sToken = token;
+        sLogManager = new LogManager(context);
+    }
+
+    public static void setUserInfo(UserInfoModel userInfo) {
+        if (sLogManager == null) return;
+        sLogManager.setUserInfo(userInfo);
     }
 
     public static void d(String tag, String msg) {
         if (isTokenEmpty()) return;
-        LogManager.send(LogManager.LOG_DEBUG, tag, msg, null);
+        if (sLogManager == null) return;
+        sLogManager.send(Constants.LOG_LEVEL_DEBUG, tag, msg, null);
     }
 
     public static void d(String tag, String msg, Throwable tr) {
         if (isTokenEmpty()) return;
-        LogManager.send(LogManager.LOG_DEBUG, tag, msg, tr);
+        if (sLogManager == null) return;
+        sLogManager.send(Constants.LOG_LEVEL_DEBUG, tag, msg, tr);
     }
 
     public static void e(String tag, String msg) {
         if (isTokenEmpty()) return;
-        LogManager.send(LogManager.LOG_ERROR, tag, msg, null);
+        if (sLogManager == null) return;
+        sLogManager.send(Constants.LOG_LEVEL_ERROR, tag, msg, null);
     }
 
     public static void e(String tag, String msg, Throwable tr) {
         if (isTokenEmpty()) return;
-        LogManager.send(LogManager.LOG_ERROR, tag, msg, tr);
+        if (sLogManager == null) return;
+        sLogManager.send(Constants.LOG_LEVEL_ERROR, tag, msg, tr);
     }
 
     private static boolean isTokenEmpty() {
