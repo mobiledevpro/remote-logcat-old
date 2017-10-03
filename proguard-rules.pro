@@ -23,3 +23,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+#these classes should be available as public
+-keep class com.mobiledevpro.remotelogcat.RemoteLog { *; }
+-keep class com.mobiledevpro.remotelogcat.UserInfoModel { *; }
