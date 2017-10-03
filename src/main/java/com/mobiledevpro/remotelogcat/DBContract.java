@@ -34,12 +34,12 @@ class DBContract {
      * Query all entries
      *
      */
-    static Cursor queryAll(SQLiteDatabase db) {
+    static Cursor selectEntriesToSend(SQLiteDatabase db) {
         return db.query(
                 Table.TABLE_NAME,
                 Table.QUERY_PROJECTION,
-                null,
-                null,
+                "CAST (" + Table.COLUMN_IS_SENDING + " as TEXT) = ?",
+                new String[]{"0"},
                 null,
                 null,
                 Table.COLUMN_DATETIME + " ASC",
@@ -78,6 +78,32 @@ class DBContract {
         return rowCount > 0;
     }
 
+    static boolean updateEntriesStatus(SQLiteDatabase db, int[] ids, boolean isSending) {
+        int result = 0;
+        db.beginTransaction();
+        ContentValues cv = new ContentValues();
+        cv.put(Table.COLUMN_IS_SENDING, isSending ? 1 : 0);
+
+        try {
+            for (int id : ids) {
+                result = result + db.update(
+                        Table.TABLE_NAME,
+                        cv,
+                        "CAST(" + Table._ID + " as TEXT) = ?",
+                        new String[]{String.valueOf(id)}
+                );
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(Constants.LOG_TAG, "DBContract.updateEntriesStatus: exception - " + e.getMessage(), e);
+            result = 0;
+        } finally {
+            db.endTransaction();
+        }
+
+        return result > 0;
+    }
+
     /**
      * Insert a new log entry
      */
@@ -101,6 +127,8 @@ class DBContract {
             cv.put(Table.COLUMN_APP_VERSION, appInfo.getVersion());
             cv.put(Table.COLUMN_APP_BUILD, appInfo.getBuild());
         }
+
+        cv.put(Table.COLUMN_IS_SENDING, 0);
 
         db.beginTransaction();
         try {
@@ -205,7 +233,8 @@ class DBContract {
         private static final String COLUMN_APP_NAME = "app_name";
         private static final String COLUMN_APP_VERSION = "app_version";
         private static final String COLUMN_APP_BUILD = "app_build";
-        private static final String COLUMN_APP_USER = "app_user"; //some data about user (divider - "|")
+        private static final String COLUMN_APP_USER = "app_user"; //some data about user (divider - ";")
+        private static final String COLUMN_IS_SENDING = "is_sending"; //indicate that the entry in already is sending to server
 
         //table create sql
         private static final String SQL_CREATE_TABLE = "create table IF NOT EXISTS "
@@ -219,7 +248,8 @@ class DBContract {
                 + COLUMN_APP_NAME + " TEXT, "
                 + COLUMN_APP_VERSION + " TEXT, "
                 + COLUMN_APP_BUILD + " INTEGER, "
-                + COLUMN_APP_USER + " TEXT "
+                + COLUMN_APP_USER + " TEXT, "
+                + COLUMN_IS_SENDING + " INTEGER "
                 + ");";
 
         private static final String[] QUERY_PROJECTION = {
@@ -231,7 +261,8 @@ class DBContract {
                 COLUMN_APP_NAME,
                 COLUMN_APP_VERSION,
                 COLUMN_APP_BUILD,
-                COLUMN_APP_USER
+                COLUMN_APP_USER,
+                COLUMN_IS_SENDING
         };
     }
 

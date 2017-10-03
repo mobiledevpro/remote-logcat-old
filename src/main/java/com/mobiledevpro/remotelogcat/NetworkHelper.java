@@ -40,11 +40,19 @@ class NetworkHelper extends AsyncTask<Void, Void, Boolean> {
     private Context mContext;
     private String mToken;
     private ArrayList<LogEntryModel> mLogEntriesList;
+    private int[] mEntriesIds;
 
     NetworkHelper(Context context, String token, ArrayList<LogEntryModel> logEntriesList) {
         mContext = context;
         mToken = token;
         mLogEntriesList = logEntriesList;
+
+        if (mLogEntriesList != null && !mLogEntriesList.isEmpty()) {
+            mEntriesIds = new int[mLogEntriesList.size()];
+            for (int i = 0, j = mLogEntriesList.size(); i < j; i++) {
+                mEntriesIds[i] = mLogEntriesList.get(i).getId();
+            }
+        }
     }
 
     /**
@@ -62,9 +70,11 @@ class NetworkHelper extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected Boolean doInBackground(Void... params) {
-        Log.d(Constants.LOG_TAG, "NetworkHelper.doInBackground(): ");
         if (!isDeviceOnline(mContext)) return false;
         if (mLogEntriesList == null || mLogEntriesList.isEmpty()) return false;
+
+        //change status for selected entries
+        DBHelper.getInstance(mContext).updateEntriesStatus(mEntriesIds, true);
 
         //create json body
         JSONArray jsonArray = createRequestBody();
@@ -76,14 +86,13 @@ class NetworkHelper extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected void onPostExecute(Boolean aBoolean) {
-        Log.d(Constants.LOG_TAG, "NetworkHelper.onPostExecute(): aBoolean - " + aBoolean);
+        DBHelper dbHelper = DBHelper.getInstance(mContext);
         if (aBoolean) {
             //remove entries from the local database
-            int[] ids = new int[mLogEntriesList.size()];
-            for (int i = 0, j = mLogEntriesList.size(); i < j; i++) {
-                ids[i] = mLogEntriesList.get(i).getId();
-            }
-            DBHelper.getInstance(mContext).deleteLogEntryList(ids);
+            dbHelper.deleteLogEntryList(mEntriesIds);
+        } else {
+            //change status for selected entries
+            dbHelper.updateEntriesStatus(mEntriesIds, false);
         }
     }
 
@@ -128,7 +137,6 @@ class NetworkHelper extends AsyncTask<Void, Void, Boolean> {
     }
 
     private boolean sendRequest(JSONArray jsonArray) {
-        Log.d(Constants.LOG_TAG, "NetworkHelper.sendRequest(): ");
         try {
             URL url = new URL(URL + "?token=" + mToken);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -143,7 +151,6 @@ class NetworkHelper extends AsyncTask<Void, Void, Boolean> {
             //write request
             OutputStreamWriter outputWriter = new OutputStreamWriter(urlConnection.getOutputStream());
             outputWriter.write(jsonArray.toString());
-            Log.d(Constants.LOG_TAG, "NetworkHelper.sendRequest(): " + jsonArray.toString());
             outputWriter.close();
 
             InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
@@ -151,15 +158,12 @@ class NetworkHelper extends AsyncTask<Void, Void, Boolean> {
             //get response
             int responseCode = urlConnection.getResponseCode();
 
-            Log.d(Constants.LOG_TAG, "NetworkHelper.sendRequest(): resp code - " + responseCode);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int length = 0;
             while ((length = inputStream.read(buffer)) != -1) {
                 baos.write(buffer, 0, length);
             }
-
-            Log.d(Constants.LOG_TAG, "NetworkHelper.sendRequest(): response: " + new String(baos.toByteArray()));
 
             urlConnection.disconnect();
 

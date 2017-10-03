@@ -3,7 +3,7 @@ package com.mobiledevpro.remotelogcat;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
+import android.support.v4.os.AsyncTaskCompat;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -28,7 +28,6 @@ class LogManager {
     private AppInfoModel mAppInfo;
     private Context mContext;
     private String mRequestToken;
-    private NetworkHelper mNetworkHelperTask;
 
     LogManager(Context appContext, String requestToken) {
         mDBHelper = DBHelper.getInstance(appContext);
@@ -98,9 +97,6 @@ class LogManager {
     }
 
     private void sendEntriesToServer(ArrayList<LogEntryModel> logEntriesList) {
-        if (mNetworkHelperTask != null && mNetworkHelperTask.getStatus() == AsyncTask.Status.RUNNING)
-            return;
-        mNetworkHelperTask = new NetworkHelper(mContext, mRequestToken, logEntriesList);
-        mNetworkHelperTask.execute();
+        AsyncTaskCompat.executeParallel(new NetworkHelper(mContext, mRequestToken, logEntriesList));
     }
 }

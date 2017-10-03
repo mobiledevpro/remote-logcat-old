@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 class DBHelper extends SQLiteOpenHelper implements IDBHelper {
     private static final String DB_NAME = "logs";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
     private static DBHelper sDBHelperInstance;
 
@@ -61,7 +61,7 @@ class DBHelper extends SQLiteOpenHelper implements IDBHelper {
         ArrayList<LogEntryModel> list = new ArrayList<>();
         LogEntryModel logEntry;
 
-        Cursor cursor = DBContract.queryAll(getReadableDatabase());
+        Cursor cursor = DBContract.selectEntriesToSend(getReadableDatabase());
 
         try {
             if (cursor.moveToFirst()) {
@@ -98,5 +98,10 @@ class DBHelper extends SQLiteOpenHelper implements IDBHelper {
     @Override
     public boolean deleteLogEntryList(int[] ids) {
         return DBContract.delete(getWritableDatabase(), ids);
+    }
+
+    @Override
+    public boolean updateEntriesStatus(int[] ids, boolean isSendingToServer) {
+        return DBContract.updateEntriesStatus(getWritableDatabase(), ids, isSendingToServer);
     }
 }

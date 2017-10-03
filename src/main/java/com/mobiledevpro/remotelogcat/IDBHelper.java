@@ -46,4 +46,12 @@ interface IDBHelper {
      * @return True - success
      */
     boolean deleteLogEntryList(int[] ids);
+
+    /**
+     * Update entries status
+     *
+     * @param ids ids
+     * @return True - success
+     */
+    boolean updateEntriesStatus(int[] ids, boolean isSendingToServer);
 }
