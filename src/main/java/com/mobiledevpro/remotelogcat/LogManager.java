@@ -28,6 +28,7 @@ class LogManager {
     private AppInfoModel mAppInfo;
     private Context mContext;
     private String mRequestToken;
+    private NetworkConnectionReceiver mNetworkConnectionReceiver;
 
     LogManager(Context appContext, String requestToken) {
         mDBHelper = DBHelper.getInstance(appContext);
@@ -45,6 +46,8 @@ class LogManager {
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(Constants.LOG_TAG, "RemoteLog.init: NameNotFoundException - " + e.getLocalizedMessage(), e);
         }
+
+        mNetworkConnectionReceiver = new NetworkConnectionReceiver();
     }
 
     void setUserInfo(UserInfoModel userInfo) {
@@ -79,6 +82,15 @@ class LogManager {
         }
     }
 
+    void reSendLogs() {
+        //  Log.d(Constants.LOG_TAG, "LogManager.reSendLogs(): ");
+        ArrayList<LogEntryModel> logEntriesList = mDBHelper.selectLogEntriesList();
+        //send saved entries to server
+        if (logEntriesList != null && !logEntriesList.isEmpty()) {
+            sendEntriesToServer(logEntriesList);
+        }
+    }
+
     private LogEntryModel createLogEntry(int logLevel, String logTag, String logMessage) {
         if (mUserInfo == null) mUserInfo = new UserInfoModel();
         return new LogEntryModel(
@@ -97,6 +109,6 @@ class LogManager {
     }
 
     private void sendEntriesToServer(ArrayList<LogEntryModel> logEntriesList) {
-        AsyncTaskCompat.executeParallel(new NetworkHelper(mContext, mRequestToken, logEntriesList));
+        AsyncTaskCompat.executeParallel(new NetworkHelper(mContext, mRequestToken, logEntriesList, mNetworkConnectionReceiver));
     }
 }

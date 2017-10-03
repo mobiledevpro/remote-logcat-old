@@ -1,8 +1,8 @@
 package com.mobiledevpro.remotelogcat;
 
 import android.content.Context;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -41,11 +41,13 @@ class NetworkHelper extends AsyncTask<Void, Void, Boolean> {
     private String mToken;
     private ArrayList<LogEntryModel> mLogEntriesList;
     private int[] mEntriesIds;
+    private NetworkConnectionReceiver mNetworkConnectionReceiver;
 
-    NetworkHelper(Context context, String token, ArrayList<LogEntryModel> logEntriesList) {
+    NetworkHelper(Context context, String token, ArrayList<LogEntryModel> logEntriesList, NetworkConnectionReceiver networkConnectionReceiver) {
         mContext = context;
         mToken = token;
         mLogEntriesList = logEntriesList;
+        mNetworkConnectionReceiver = networkConnectionReceiver;
 
         if (mLogEntriesList != null && !mLogEntriesList.isEmpty()) {
             mEntriesIds = new int[mLogEntriesList.size()];
@@ -55,22 +57,24 @@ class NetworkHelper extends AsyncTask<Void, Void, Boolean> {
         }
     }
 
-    /**
-     * Method for checking network connection
-     *
-     * @param context - application context
-     * @return true - device online
-     */
-    private boolean isDeviceOnline(Context context) {
-        ConnectivityManager connMngr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = connMngr.getActiveNetworkInfo();
-        return (netInfo != null && netInfo.isConnected());
-    }
-
 
     @Override
     protected Boolean doInBackground(Void... params) {
-        if (!isDeviceOnline(mContext)) return false;
+        if (!Constants.isDeviceOnline(mContext)) {
+            if (mNetworkConnectionReceiver != null) {
+                mContext.registerReceiver(mNetworkConnectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+            }
+            return false;
+        } else {
+            try {
+                if (mNetworkConnectionReceiver != null) {
+                    mContext.unregisterReceiver(mNetworkConnectionReceiver);
+                }
+            } catch (IllegalArgumentException e) {
+                //do nothing
+            }
+        }
+
         if (mLogEntriesList == null || mLogEntriesList.isEmpty()) return false;
 
         //change status for selected entries

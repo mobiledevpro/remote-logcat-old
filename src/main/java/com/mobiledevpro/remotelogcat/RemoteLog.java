@@ -58,6 +58,11 @@ public class RemoteLog {
         sLogManager.send(Constants.LOG_LEVEL_ERROR, tag, msg, tr);
     }
 
+    static void resendLogs() {
+        if (sLogManager == null) return;
+        sLogManager.reSendLogs();
+    }
+
     private static boolean isTokenEmpty() {
         boolean b = TextUtils.isEmpty(sToken);
         if (b)
