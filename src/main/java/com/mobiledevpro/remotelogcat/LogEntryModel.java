@@ -1,5 +1,10 @@
 package com.mobiledevpro.remotelogcat;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Model for log entry
  * <p>
@@ -12,6 +17,8 @@ package com.mobiledevpro.remotelogcat;
  */
 
 class LogEntryModel {
+
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
     private int id;
     private long dateTime; //in ms
@@ -46,7 +53,7 @@ class LogEntryModel {
         this.appUserInfo = appUserInfo;
     }
 
-    public int getId() {
+    int getId() {
         return id;
     }
 
@@ -54,8 +61,16 @@ class LogEntryModel {
         return dateTime;
     }
 
+    String getDateTimeTxt() {
+        return getStringFromDateTime(dateTime);
+    }
+
     int getLogLevel() {
         return logLevel;
+    }
+
+    String getLogLevelTxt() {
+        return Constants.getLogLevelTxt(logLevel);
     }
 
     String getLogTag() {
@@ -72,6 +87,21 @@ class LogEntryModel {
 
     UserInfoModel getAppUserInfo() {
         return appUserInfo;
+    }
+
+
+    /**
+     * Convert Date to Date in string format
+     *
+     * @param dateTime Date in milliseconds
+     * @return Date in string format
+     */
+    private String getStringFromDateTime(long dateTime) {
+        if (dateTime == 0) return "";
+        Date date = new Date(dateTime);
+        SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
+        format.setTimeZone(Calendar.getInstance().getTimeZone());
+        return format.format(date);
     }
 
 }

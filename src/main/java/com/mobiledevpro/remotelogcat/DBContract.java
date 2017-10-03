@@ -146,6 +146,34 @@ class DBContract {
     }
 
     /**
+     * Delete log entry by Id
+     *
+     * @param db          SQLiteDatabase
+     * @param logEntryIds Log entry ids
+     */
+    static boolean delete(SQLiteDatabase db, int[] logEntryIds) {
+        long result = 0;
+        db.beginTransaction();
+        try {
+            for (int id : logEntryIds) {
+                result = result + db.delete(
+                        Table.TABLE_NAME,
+                        "CAST (" + Table._ID + " as TEXT) =?",
+                        new String[]{String.valueOf(id)}
+                );
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(Constants.LOG_TAG, "DBContract.delete: exception - " + e.getLocalizedMessage(), e);
+        } finally {
+            db.endTransaction();
+        }
+
+        return result > 0;
+    }
+
+
+    /**
      * Convert cursor data to LogEntry model
      *
      * @param cursor Cursor

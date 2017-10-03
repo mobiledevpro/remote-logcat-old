@@ -39,7 +39,7 @@ public class UserInfoModel {
     UserInfoModel parseUserInfo(String userInfo) {
         if (TextUtils.isEmpty(userInfo)) return this;
         //android api|
-        String[] arrayInfo = userInfo.split("|");
+        String[] arrayInfo = userInfo.split(";");
         if (arrayInfo.length == 0) return this;
 
         if (arrayInfo.length > 0) this.androidApi = Integer.valueOf("0" + arrayInfo[0]);
@@ -49,8 +49,8 @@ public class UserInfoModel {
         return this;
     }
 
-    int getAndroidApi() {
-        return androidApi;
+    String getAndroidApiTxt() {
+        return "API " + androidApi;
     }
 
     String getDeviceModel() {
@@ -62,9 +62,9 @@ public class UserInfoModel {
     }
 
     String getString() {
-        return "API " + androidApi +
-                (!TextUtils.isEmpty(deviceModel) ? "|" + deviceModel : "") +
-                (!TextUtils.isEmpty(userName) ? "|" + userName : "");
+        return androidApi +
+                (!TextUtils.isEmpty(deviceModel) ? ";" + deviceModel : "") +
+                (!TextUtils.isEmpty(userName) ? ";" + userName : "");
     }
 
     private String getDeviceName() {

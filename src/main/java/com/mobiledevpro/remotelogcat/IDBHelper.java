@@ -38,4 +38,12 @@ interface IDBHelper {
      * @return True - success
      */
     boolean deleteLogEntry(int id);
+
+    /**
+     * Delete log entries
+     *
+     * @param ids ids
+     * @return True - success
+     */
+    boolean deleteLogEntryList(int[] ids);
 }

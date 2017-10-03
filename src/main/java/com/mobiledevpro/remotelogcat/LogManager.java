@@ -3,6 +3,7 @@ package com.mobiledevpro.remotelogcat;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -25,9 +26,14 @@ class LogManager {
     private DBHelper mDBHelper;
     private UserInfoModel mUserInfo;
     private AppInfoModel mAppInfo;
+    private Context mContext;
+    private String mRequestToken;
+    private NetworkHelper mNetworkHelperTask;
 
-    LogManager(Context appContext) {
+    LogManager(Context appContext, String requestToken) {
         mDBHelper = DBHelper.getInstance(appContext);
+        mContext = appContext;
+        mRequestToken = requestToken;
 
         PackageManager manager = appContext.getPackageManager();
         try {
@@ -68,12 +74,10 @@ class LogManager {
         LogEntryModel logEntryModel = createLogEntry(logLevel, logTag, logMessage);
         //save into db
         ArrayList<LogEntryModel> logEntriesList = insertEntryIntoDb(logEntryModel);
-        //send to server
+        //send saved entries to server
         if (logEntriesList != null && !logEntriesList.isEmpty()) {
             sendEntriesToServer(logEntriesList);
         }
-
-        // TODO: 23.09.17 save data to sqllite and send to server if there is network connection
     }
 
     private LogEntryModel createLogEntry(int logLevel, String logTag, String logMessage) {
@@ -89,13 +93,14 @@ class LogManager {
     }
 
     private ArrayList<LogEntryModel> insertEntryIntoDb(LogEntryModel logEntryModel) {
-        // TODO: 23.09.17 need to mplement asynctask for inserting
         mDBHelper.insertLogEntry(logEntryModel);
         return mDBHelper.selectLogEntriesList();
     }
 
-    private static void sendEntriesToServer(ArrayList<LogEntryModel> logEntriesList) {
-        // TODO: 23.09.17  
+    private void sendEntriesToServer(ArrayList<LogEntryModel> logEntriesList) {
+        if (mNetworkHelperTask != null && mNetworkHelperTask.getStatus() == AsyncTask.Status.RUNNING)
+            return;
+        mNetworkHelperTask = new NetworkHelper(mContext, mRequestToken, logEntriesList);
+        mNetworkHelperTask.execute();
     }
-
 }

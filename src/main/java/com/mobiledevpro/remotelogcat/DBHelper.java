@@ -94,4 +94,9 @@ class DBHelper extends SQLiteOpenHelper implements IDBHelper {
     public boolean deleteLogEntry(int id) {
         return DBContract.delete(getWritableDatabase(), id);
     }
+
+    @Override
+    public boolean deleteLogEntryList(int[] ids) {
+        return DBContract.delete(getWritableDatabase(), ids);
+    }
 }

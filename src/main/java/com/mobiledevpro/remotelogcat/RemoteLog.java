@@ -26,7 +26,7 @@ public class RemoteLog {
 
     public static void init(Context context, @NonNull String token) {
         sToken = token;
-        sLogManager = new LogManager(context);
+        sLogManager = new LogManager(context, token);
     }
 
     public static void setUserInfo(UserInfoModel userInfo) {
