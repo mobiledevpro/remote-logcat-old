@@ -30,3 +30,4 @@ RemoteLog.setUserInfo(
     RemoteLog.e("log tag here", "error text here");
     ```
 6. See logs on web-page http://api.mobile-dev.pro/applog/
+7. [Sign-Up](http://api.mobile-dev.pro/applog/auth/signup/30348ec6af2a3fc99282710806c33a86)
